@@ -1,3 +1,3 @@
 # Shobu
 
-Running `pkg shobu.js` should create executables.
+Executables for various platforms can be found in `bin`

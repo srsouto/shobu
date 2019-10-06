@@ -3,6 +3,3 @@ build
 npm-debug.log
 .env
 .DS_Store
-shobu-linux
-shobu-macos
-shobu-win.exe
