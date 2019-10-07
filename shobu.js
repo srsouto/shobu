@@ -601,19 +601,38 @@ function isQuadrant(quadrant) {
 }
 
 function drawGameboard(gameboard) {
-	process.stdout.write("dark    light\n\n");
+	process.stdout.write(" | dark    light\n\n");
 	drawShobuRow(gameboard.topLeft, gameboard.topRight);
-	process.stdout.write("------------\n");
+	process.stdout.write("---1234----1234-\n");
 	drawShobuRow(gameboard.botLeft, gameboard.botRight);
 	process.stdout.write("\nO = black   X = white\n\n");
 }
 
 function drawShobuRow(leftShobu, rightShobu) {
 	for(var i = 0; i < 4; i++){
+		switch(i){
+			case 0: {
+				process.stdout.write("A");
+				break;
+			};
+			case 1: {
+				process.stdout.write("B");
+				break;
+			 };
+			case 2: {
+				process.stdout.write("C");
+				break;
+			};
+			case 3: {
+				process.stdout.write("D");
+				break;
+			};
+		}
+		process.stdout.write("| ");
 		leftShobu[i].forEach((tile) => {
 			process.stdout.write(tile);
 		});
-		process.stdout.write("\t");
+		process.stdout.write("    ");
 		rightShobu[i].forEach((tile) => {
 			process.stdout.write(tile);
 		});
