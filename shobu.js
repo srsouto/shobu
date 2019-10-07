@@ -17,6 +17,8 @@ var gameboard = {
 	topRight: createArray(4, 4),
 };
 
+const EMPTY_SPACE = "-"
+
 fillGameboard(gameboard);
 drawGameboard(gameboard);
 
@@ -144,44 +146,30 @@ function validateAggresiveMove(parsedInput, whoseTurn) {
 	var quadrant = parsedInput[0];
 	var moveStart = parsedInput[1];
 	var moveEnd = parsedInput[2];
+	var friendlyStone = whoseTurn === "Black" ? "0" : "X"
+	var enemyStone = whoseTurn === "Black" ? "X" : "0"
 
 	var shobu = gameboard[quadrant];
 	var vector = getVectorFromMove(moveStart, moveEnd);
 
 	// Only moving one space
-	if (Math.abs(getRow(moveStart) - getRow(moveEnd)) < 2 && Math.abs(getColumn(moveStart) - getColumn(moveEnd)) < 2) {
+	if (Math.abs(vector.colMag) <= 1 && Math.abs(vector.rowMag) <= 1){
 		var stoneAtEndLocation = shobu[getRow(moveEnd)][getColumn(moveEnd)];
-		if (stoneAtEndLocation === "-") {
+		if (stoneAtEndLocation === EMPTY_SPACE) {
 			return {valid: true};
 		}
 
-		if (whoseTurn === "Black") {
-			if (stoneAtEndLocation === "O") {
-				return "Cannot push stones of the same color";
-			} else {
-				var direction = getDirectionFromVector_one(vector);
-				var newPushedStoneLocation = getPushedStoneNewLocation(getRow(moveEnd), getColumn(moveEnd), direction);
-				if (convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col).includes("not")) {
-					return {valid: true};
-				} else if (shobu[newPushedStoneLocation.row][newPushedStoneLocation.col] !== "-") {
-					return "Cannot push stone into another stone";
-				} else {
-					return {valid: true, push: {stone: "X", end: convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col)}};
-				}
-			}
+		if (stoneAtEndLocation === friendlyStone) {
+			return "Cannot push stones of the same color";
 		} else {
-			if (stoneAtEndLocation === "X") {
-				return "Cannot push stones of the same color";
+			var direction = getDirectionFromVector_one(vector);
+			var newPushedStoneLocation = getPushedStoneNewLocation(getRow(moveEnd), getColumn(moveEnd), direction);
+			if (convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col).includes("not")) {
+				return {valid: true};
+			} else if (shobu[newPushedStoneLocation.row][newPushedStoneLocation.col] !== EMPTY_SPACE) {
+				return "Cannot push stone into another stone";
 			} else {
-				var direction = getDirectionFromVector_one(vector);
-				var newPushedStoneLocation = getPushedStoneNewLocation(getRow(moveEnd), getColumn(moveEnd), direction);
-				if (convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col).includes("not")) {
-					return {valid: true};
-				} else if (shobu[newPushedStoneLocation.row][newPushedStoneLocation.col] !== "-") {
-					return "Cannot push stone into another stone";
-				} else {
-					return {valid: true, push: {stone: "O", end: convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col)}};
-				}
+				return {valid: true, push: {stone: enemyStone, end: convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col)}};
 			}
 		}
 	// Moving two spaces
@@ -193,86 +181,44 @@ function validateAggresiveMove(parsedInput, whoseTurn) {
 		var stoneAtFinalLocation = shobu[getRow(moveEnd)][getColumn(moveEnd)];
 
 		// Look at middle move
-		if (whoseTurn === "Black") {
-			if (stoneAtMiddleLocation === "O") {
-				return "Cannot push stones of the same color";
-			} else if (stoneAtMiddleLocation === "X") {
-				var newPushedStoneMiddleLocation = getPushedStoneNewLocation(getRow(moveMiddle), getColumn(moveMiddle), direction);				
-				if (convertToGrid(newPushedStoneMiddleLocation.row, newPushedStoneMiddleLocation.col).includes("not")) {					
-					return "Something went wrong, we should not be at the edge here...";
-				} else if (shobu[newPushedStoneMiddleLocation.row][newPushedStoneMiddleLocation.col] !== "-") {					
-					return "Cannot push stone into another stone";
-				} else {
-					var newPushedStoneEndLocation = getPushedStoneNewLocation(getRow(moveEnd), getColumn(moveEnd), direction);
-					if (convertToGrid(newPushedStoneEndLocation.row, newPushedStoneEndLocation.col).includes("not")) {						
-						return {valid: true, doublePush: moveMiddle};
-					} else if (shobu[newPushedStoneEndLocation.row][newPushedStoneEndLocation.col] !== "-") {						
-						return "Cannot push stone into another stone";
-					} else {						
-						return {
-							valid: true, 
-							push: {stone: "X", end: convertToGrid(newPushedStoneEndLocation.row, newPushedStoneEndLocation.col)},
-							doublePush: moveMiddle
-						};
-					}
-				}
+		// if (whoseTurn === "Black") {
+		if (stoneAtMiddleLocation === friendlyStone) {
+			return "Cannot push stones of the same color";
+		} else if (stoneAtMiddleLocation === enemyStone) {
+			var newPushedStoneMiddleLocation = getPushedStoneNewLocation(getRow(moveMiddle), getColumn(moveMiddle), direction);				
+			if (convertToGrid(newPushedStoneMiddleLocation.row, newPushedStoneMiddleLocation.col).includes("not")) {					
+				return "Something went wrong, we should not be at the edge here...";
+			} else if (shobu[newPushedStoneMiddleLocation.row][newPushedStoneMiddleLocation.col] !== EMPTY_SPACE) {					
+				return "Cannot push stone into another stone";
 			} else {
-				if (stoneAtFinalLocation === "-") {					
-					return {valid: true};
-				}
-
-				if (stoneAtEndLocation === "O") {					
-					return "Cannot push stones of the same color";
-				} else {
-					var newPushedStoneLocation = getPushedStoneNewLocation(getRow(moveEnd), getColumn(moveEnd), direction);
-					if (convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col).includes("not")) {						
-						return {valid: true};
-					} else if (shobu[newPushedStoneLocation.row][newPushedStoneLocation.col] !== "-") {						
-						return "Cannot push stone into another stone";
-					} else {						
-						return {valid: true, push: {stone: "X", end: convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col)}};
-					}
+				var newPushedStoneEndLocation = getPushedStoneNewLocation(getRow(moveEnd), getColumn(moveEnd), direction);
+				if (convertToGrid(newPushedStoneEndLocation.row, newPushedStoneEndLocation.col).includes("not")) {						
+					return {valid: true, doublePush: moveMiddle};
+				} else if (shobu[newPushedStoneEndLocation.row][newPushedStoneEndLocation.col] !== EMPTY_SPACE) {						
+					return "Cannot push stone into another stone";
+				} else {						
+					return {
+						valid: true, 
+						push: {stone: enemyStone, end: convertToGrid(newPushedStoneEndLocation.row, newPushedStoneEndLocation.col)},
+						doublePush: moveMiddle
+					};
 				}
 			}
 		} else {
-			if (stoneAtMiddleLocation === "X") {				
-				return "Cannot push stones of the same color";
-			} else if (stoneAtMiddleLocation === "O") {
-				var newPushedStoneMiddleLocation = getPushedStoneNewLocation(getRow(moveMiddle), getColumn(moveMiddle), direction);				
-				if (convertToGrid(newPushedStoneMiddleLocation.row, newPushedStoneMiddleLocation.col).includes("not")) {					
-					return "Something went wrong, we should not be at the edge here...";
-				} else if (shobu[newPushedStoneMiddleLocation.row][newPushedStoneMiddleLocation.col] !== "-") {					
-					return "Cannot push stone into another stone";
-				} else {
-					var newPushedStoneEndLocation = getPushedStoneNewLocation(getRow(moveEnd), getColumn(moveEnd), direction);					
-					if (convertToGrid(newPushedStoneEndLocation.row, newPushedStoneEndLocation.col).includes("not")) {						
-						return {valid: true, doublePush: moveMiddle};
-					} else if (shobu[newPushedStoneEndLocation.row][newPushedStoneEndLocation.col] !== "-") {						
-						return "Cannot push stone into another stone";
-					} else {						
-						return {
-							valid: true, 
-							push: {stone: "O", end: convertToGrid(newPushedStoneEndLocation.row, newPushedStoneEndLocation.col)},
-							doublePush: moveMiddle
-						};
-					}
-				}
-			} else {
-				if (stoneAtFinalLocation === "-") {					
-					return {valid: true};
-				}
+			if (stoneAtFinalLocation === "-") {					
+				return {valid: true};
+			}
 
-				if (stoneAtEndLocation === "X") {					
-					return "Cannot push stones of the same color";
-				} else {
-					var newPushedStoneLocation = getPushedStoneNewLocation(getRow(moveEnd), getColumn(moveEnd), direction);
-					if (convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col).includes("not")) {						
-						return {valid: true};
-					} else if (shobu[newPushedStoneLocation.row][newPushedStoneLocation.col] !== "-") {						
-						return "Cannot push stone into another stone";
-					} else {						
-						return {valid: true, push: {stone: "O", end: convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col)}};
-					}
+			if (stoneAtEndLocation === friendlyStone) {					
+				return "Cannot push stones of the same color";
+			} else {
+				var newPushedStoneLocation = getPushedStoneNewLocation(getRow(moveEnd), getColumn(moveEnd), direction);
+				if (convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col).includes("not")) {						
+					return {valid: true};
+				} else if (shobu[newPushedStoneLocation.row][newPushedStoneLocation.col] !== EMPTY_SPACE) {						
+					return "Cannot push stone into another stone";
+				} else {						
+					return {valid: true, push: {stone: enemyStone, end: convertToGrid(newPushedStoneLocation.row, newPushedStoneLocation.col)}};
 				}
 			}
 		}
