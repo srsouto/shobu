@@ -1,5 +1,9 @@
 const inquirer = require('inquirer');
 
+const EMPTY_SPACE = "-";
+const BLACK_STONE = "O";
+const WHITE_STONE = "X";
+
 console.log('\033[2J');
 console.log("Shobu!");
 console.log();
@@ -16,8 +20,6 @@ var gameboard = {
 	topLeft: createArray(4, 4),
 	topRight: createArray(4, 4),
 };
-
-const EMPTY_SPACE = "-"
 
 fillGameboard(gameboard);
 drawGameboard(gameboard);
@@ -77,7 +79,7 @@ function updateGameboardWithMove(moveParsed, whoseTurn) {
 	var quadrant = moveParsed[0];
 	var moveStart = moveParsed[1];
 	var moveEnd = moveParsed[2];
-	var turnLetter = (whoseTurn === "Black") ? "O" : "X";
+	var turnLetter = (whoseTurn === "Black") ? BLACK_STONE : WHITE_STONE;
 
 	var shobu = gameboard[quadrant];
 	shobu[getRow(moveStart)][getColumn(moveStart)] = "-";
@@ -90,7 +92,7 @@ function updateGameboardWithAggresiveMove(moveParsed, whoseTurn) {
 	var quadrant = moveParsed[0];
 	var moveStart = moveParsed[1];
 	var moveEnd = moveParsed[2];
-	var turnLetter = (whoseTurn === "Black") ? "O" : "X";
+	var turnLetter = (whoseTurn === "Black") ? BLACK_STONE : WHITE_STONE;
 	var shobu = gameboard[quadrant];
 
 	var validate = validateAggresiveMove(moveParsed, whoseTurn);
@@ -146,8 +148,8 @@ function validateAggresiveMove(parsedInput, whoseTurn) {
 	var quadrant = parsedInput[0];
 	var moveStart = parsedInput[1];
 	var moveEnd = parsedInput[2];
-	var friendlyStone = whoseTurn === "Black" ? "0" : "X"
-	var enemyStone = whoseTurn === "Black" ? "X" : "0"
+	var friendlyStone = whoseTurn === "Black" ? BLACK_STONE : WHITE_STONE
+	var enemyStone = whoseTurn === "Black" ? WHITE_STONE : BLACK_STONE
 
 	var shobu = gameboard[quadrant];
 	var vector = getVectorFromMove(moveStart, moveEnd);
@@ -181,7 +183,6 @@ function validateAggresiveMove(parsedInput, whoseTurn) {
 		var stoneAtFinalLocation = shobu[getRow(moveEnd)][getColumn(moveEnd)];
 
 		// Look at middle move
-		// if (whoseTurn === "Black") {
 		if (stoneAtMiddleLocation === friendlyStone) {
 			return "Cannot push stones of the same color";
 		} else if (stoneAtMiddleLocation === enemyStone) {
@@ -389,7 +390,7 @@ function getEndFromStartAndVector(start, vector) {
 
 function getStoneLocations(quadrant, whoseTurn) {
 	var shobu = gameboard[quadrant];
-	var stoneLetter = (whoseTurn === "Black") ? "O" : "X";
+	var stoneLetter = (whoseTurn === "Black") ? BLACK_STONE : WHITE_STONE;
 
 	var locations = [];
 
@@ -452,7 +453,7 @@ function isMoveStartValid(quadrant, moveStart, whoseTurn) {
 		}
 
 		var shobu = gameboard[quadrant];
-		if (shobu[getRow(moveStart)][getColumn(moveStart)] !== "O") {
+		if (shobu[getRow(moveStart)][getColumn(moveStart)] !== BLACK_STONE) {
 			return moveStart + " is not a " + whoseTurn + " stone";
 		}
 	} else {
@@ -466,7 +467,7 @@ function isMoveStartValid(quadrant, moveStart, whoseTurn) {
 		}
 
 		var shobu = gameboard[quadrant];
-		if (shobu[getRow(moveStart)][getColumn(moveStart)] !== "X") {
+		if (shobu[getRow(moveStart)][getColumn(moveStart)] !== WHITE_STONE) {
 			return moveStart + " is not a " + whoseTurn + " stone";
 		}
 	}
@@ -591,9 +592,9 @@ function scanForWin(shobu) {
 	var whiteCount = 0;
 	for(var i = 0; i < 4; i++){
 		shobu[i].forEach((tile) => {
-			if (tile === "X") {
+			if (tile === WHITE_STONE) {
 				whiteCount++;
-			} else if (tile === "O") {
+			} else if (tile === BLACK_STONE) {
 				blackCount++;
 			}
 		});
@@ -608,10 +609,10 @@ function scanForWin(shobu) {
 
 function fillGameboard(gameboard) {
 	// Bottom left
-	gameboard.botLeft[0][0] = "X";
-	gameboard.botLeft[0][1] = "X";
-	gameboard.botLeft[0][2] = "X";
-	gameboard.botLeft[0][3] = "X";
+	gameboard.botLeft[0][0] = WHITE_STONE;
+	gameboard.botLeft[0][1] = WHITE_STONE;
+	gameboard.botLeft[0][2] = WHITE_STONE;
+	gameboard.botLeft[0][3] = WHITE_STONE;
 
 	gameboard.botLeft[1][0] = "-";
 	gameboard.botLeft[1][1] = "-";
@@ -623,16 +624,16 @@ function fillGameboard(gameboard) {
 	gameboard.botLeft[2][2] = "-";
 	gameboard.botLeft[2][3] = "-";
 
-	gameboard.botLeft[3][0] = "O";
-	gameboard.botLeft[3][1] = "O";
-	gameboard.botLeft[3][2] = "O";
-	gameboard.botLeft[3][3] = "O";
+	gameboard.botLeft[3][0] = BLACK_STONE;
+	gameboard.botLeft[3][1] = BLACK_STONE;
+	gameboard.botLeft[3][2] = BLACK_STONE;
+	gameboard.botLeft[3][3] = BLACK_STONE;
 
 	// Bottom right
-	gameboard.botRight[0][0] = "X";
-	gameboard.botRight[0][1] = "X";
-	gameboard.botRight[0][2] = "X";
-	gameboard.botRight[0][3] = "X";
+	gameboard.botRight[0][0] = WHITE_STONE;
+	gameboard.botRight[0][1] = WHITE_STONE;
+	gameboard.botRight[0][2] = WHITE_STONE;
+	gameboard.botRight[0][3] = WHITE_STONE;
 
 	gameboard.botRight[1][0] = "-";
 	gameboard.botRight[1][1] = "-";
@@ -644,16 +645,16 @@ function fillGameboard(gameboard) {
 	gameboard.botRight[2][2] = "-";
 	gameboard.botRight[2][3] = "-";
 
-	gameboard.botRight[3][0] = "O";
-	gameboard.botRight[3][1] = "O";
-	gameboard.botRight[3][2] = "O";
-	gameboard.botRight[3][3] = "O";
+	gameboard.botRight[3][0] = BLACK_STONE;
+	gameboard.botRight[3][1] = BLACK_STONE;
+	gameboard.botRight[3][2] = BLACK_STONE;
+	gameboard.botRight[3][3] = BLACK_STONE;
 
 	// Top left
-	gameboard.topLeft[0][0] = "X";
-	gameboard.topLeft[0][1] = "X";
-	gameboard.topLeft[0][2] = "X";
-	gameboard.topLeft[0][3] = "X";
+	gameboard.topLeft[0][0] = WHITE_STONE;
+	gameboard.topLeft[0][1] = WHITE_STONE;
+	gameboard.topLeft[0][2] = WHITE_STONE;
+	gameboard.topLeft[0][3] = WHITE_STONE;
 
 	gameboard.topLeft[1][0] = "-";
 	gameboard.topLeft[1][1] = "-";
@@ -665,16 +666,16 @@ function fillGameboard(gameboard) {
 	gameboard.topLeft[2][2] = "-";
 	gameboard.topLeft[2][3] = "-";
 
-	gameboard.topLeft[3][0] = "O";
-	gameboard.topLeft[3][1] = "O";
-	gameboard.topLeft[3][2] = "O";
-	gameboard.topLeft[3][3] = "O";
+	gameboard.topLeft[3][0] = BLACK_STONE;
+	gameboard.topLeft[3][1] = BLACK_STONE;
+	gameboard.topLeft[3][2] = BLACK_STONE;
+	gameboard.topLeft[3][3] = BLACK_STONE;
 
 	// Top right
-	gameboard.topRight[0][0] = "X";
-	gameboard.topRight[0][1] = "X";
-	gameboard.topRight[0][2] = "X";
-	gameboard.topRight[0][3] = "X";
+	gameboard.topRight[0][0] = WHITE_STONE;
+	gameboard.topRight[0][1] = WHITE_STONE;
+	gameboard.topRight[0][2] = WHITE_STONE;
+	gameboard.topRight[0][3] = WHITE_STONE;
 
 	gameboard.topRight[1][0] = "-";
 	gameboard.topRight[1][1] = "-";
@@ -686,10 +687,10 @@ function fillGameboard(gameboard) {
 	gameboard.topRight[2][2] = "-";
 	gameboard.topRight[2][3] = "-";
 
-	gameboard.topRight[3][0] = "O";
-	gameboard.topRight[3][1] = "O";
-	gameboard.topRight[3][2] = "O";
-	gameboard.topRight[3][3] = "O";
+	gameboard.topRight[3][0] = BLACK_STONE;
+	gameboard.topRight[3][1] = BLACK_STONE;
+	gameboard.topRight[3][2] = BLACK_STONE;
+	gameboard.topRight[3][3] = BLACK_STONE;
 }
 
 function createArray(length) {
