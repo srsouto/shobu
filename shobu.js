@@ -743,7 +743,7 @@ class Opponent {
     takeTurn(args){
 		console.log("Computer Player is taking her turn....")
 
-		var boardStateCopy = JSON.parse(JSON.stringify(boardState));
+		var boardStateCopy = JSON.parse(JSON.stringify(gameboard));
 		var turnOptions = getTurnOptions(boardStateCopy, "Black")
 		if(turnOptions.length < 1){
 			console.log("Never mind, Computer Player doesnt think it has a turn. It's your turn again")
@@ -751,7 +751,7 @@ class Opponent {
 		} else {
 			var bestOption = { value: -1000, turn: turnOptions[0]}
 			turnOptions.map(option => {
-				optionValue = minimax(applyTurn(boardStateCopy, option), 5, true)
+				optionValue = minimax(safeApplyTurn(boardStateCopy, option), 5, true)
 				if(optionValue > bestOption.value){
 					bestOption.value = optionValue;
 					bestOption.turn = option;
@@ -775,14 +775,14 @@ class Opponent {
 			var value = -1000;
 			var turnOptions = getTurnOptions(boardStateCopy, "Black")
 			turnOptions.map(option => {
-				value = max(value, minimax(applyTurn(boardStateCopy, option), depth - 1, false))
+				value = max(value, minimax(safeApplyTurn(boardStateCopy, option), depth - 1, false))
 			})
 			return value
 		} else {// minimizing player *)
 			var value = 1000;
 			var turnOptions = getTurnOptions(boardStateCopy, "White")
 			turnOptions.map(option => {
-				value = min(value, minimax(applyTurn(boardStateCopy, option), depth - 1, true))
+				value = min(value, minimax(safeApplyTurn(boardStateCopy, option), depth - 1, true))
 			})
 			return value
 		}
@@ -807,7 +807,7 @@ function isTerminalBoardState(){
 // could experiment with weighting 3 stones/ 2 stones/ 1 stones differently 
 // could experiment with weighting passive-side stones higher/lower
 function boardStateValue(boardState){
-	boardStateValue
+	return 0;
 }
 
 // Should return an array of 'turn' objects
@@ -815,6 +815,11 @@ function boardStateValue(boardState){
 // { passiveMove: ... , aggressiveMove: ... }
 function getTurnOptions(){
 	return [];
+}
+
+//creates a copy of the board state so it isn't modifying instances of that board state elsewhere
+function safeApplyTurn(boardState){
+	return applyTurn(JSON.parse(JSON.stringify(boardState)));
 }
 
 // Takes a board state and a 'turn' object
