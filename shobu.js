@@ -94,7 +94,7 @@ function promptForMove(whoseTurn) {
 	  console.log('\033[2J');
 	  drawGameboard(gameboard);
 
-	  if (scanForWin(gameboard.topLeft) || scanForWin(gameboard.topRight) || scanForWin(gameboard.botLeft) || scanForWin(gameboard.botRight)) {
+	  if (scanGameForWin(gameboard)) {
 	  	console.log(whoseTurn + " wins!");
 	  	process.exit();
 	  } else {
@@ -613,6 +613,10 @@ function drawShobuRow(leftShobu, rightShobu) {
 	}
 }
 
+function scanGameForWin(boardState){
+	return scanForWin(boardState.topLeft) || scanForWin(boardState.topRight) || scanForWin(boardState.botLeft) || scanForWin(boardState.botRight)
+}
+
 function scanForWin(shobu) {
 	var blackCount = 0;
 	var whiteCount = 0;
@@ -791,8 +795,8 @@ class Opponent {
 
 // Should return whether either player won
 //(or if both players cannot move, kinda tricky)
-function isTerminalBoardState(){
-	return true;
+function isTerminalBoardState(boardState){
+	return scanGameForWin(boardState);
 };
 
 // Returns how good the board state is with 0 being neutral,
