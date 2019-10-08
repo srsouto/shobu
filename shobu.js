@@ -743,9 +743,24 @@ class Opponent {
     takeTurn(args){
 		console.log("Computer Player is taking her turn....")
 
-		// minimax(gameboard, 3, true)
-		console.log("Never mind, Computer Player decided to pass and it's your turn again")
-		args.callBack();
+		var boardStateCopy = JSON.parse(JSON.stringify(boardState));
+		var turnOptions = getTurnOptions(boardStateCopy, "Black")
+		if(turnOptions.length < 1){
+			console.log("Never mind, Computer Player doesnt think it has a turn. It's your turn again")
+			args.callBack();
+		} else {
+			var bestOption = { value: -1000, turn: turnOptions[0]}
+			turnOptions.map(option => {
+				optionValue = minimax(applyTurn(boardStateCopy, option), 5, true)
+				if(optionValue > bestOption.value){
+					bestOption.value = optionValue;
+					bestOption.turn = option;
+				}
+			})
+
+			applyTurn(gameboard, bestOption);
+			args.callBack();
+		}
 	}
 
 	// This is basically the PseudoCode for minimax lifted directly from https://en.wikipedia.org/wiki/Minimax 
