@@ -3,6 +3,7 @@ const inquirer = require('inquirer');
 const EMPTY_SPACE = "-";
 const BLACK_STONE = "O";
 const WHITE_STONE = "X";
+const QUADRANTS = ["botLeft", "botRight", "topLeft", "topRight"];
 
 console.log('\033[2J');
 console.log("Shobu!");
@@ -20,6 +21,9 @@ var gameboard = {
 	topLeft: createArray(4, 4),
 	topRight: createArray(4, 4),
 };
+var playerCount;
+var opponent;
+
 
 fillGameboard(gameboard);
 drawGameboard(gameboard);
@@ -27,7 +31,31 @@ drawGameboard(gameboard);
 beginGame();
 
 async function beginGame() {
-	promptForMove("Black");
+	promptForPlayerCount().then(answers => {
+
+		playerCount = answers.gameType === 'vs AI' ? 1 : 2;
+
+		console.log("answered with ", playerCount)
+		if( playerCount === 1 ){
+			opponent = new Opponent();
+			opponent.taunt();
+		}
+	
+		promptForMove("Black");
+	});
+}
+
+async function promptForPlayerCount(){
+	var questions = [
+		{
+			type: 'list',
+			name: 'gameType',
+			message: 'How would you like to play?',
+			choices: ['vs AI', 'vs Another Human'],
+		}
+	]
+
+	return inquirer.prompt(questions)
 }
 
 function promptForMove(whoseTurn) {
@@ -70,7 +98,15 @@ function promptForMove(whoseTurn) {
 	  	console.log(whoseTurn + " wins!");
 	  	process.exit();
 	  } else {
-	  	(whoseTurn === "Black") ? promptForMove("White") : promptForMove("Black")
+		  if (whoseTurn === "Black"){
+			if (playerCount === 1){
+				opponent.takeTurn({ callBack: () => promptForMove("Black") });
+			} else {
+				promptForMove("White")
+			}
+		  } else {
+			promptForMove("Black")
+		  }
 	  }
 	});
 }
@@ -534,17 +570,7 @@ function getColumn(move) {
 }
 
 function isQuadrant(quadrant) {
-	if (quadrant === "botLeft") {
-		return true;
-	} else if (quadrant === "botRight") {
-		return true;
-	} else if (quadrant === "topLeft") {
-		return true;
-	} else if (quadrant === "topRight") {
-		return true;
-	} else {
-		return "Quadrant is not valid."
-	}
+	return QUADRANTS.includes(quadrant) ? true : "Quadrant is not valid.";
 }
 
 function drawGameboard(gameboard) {
@@ -703,4 +729,82 @@ function createArray(length) {
     }
 
     return arr;
+}
+
+class Opponent {
+    constructor(){
+        console.log('constructing opponent')
+    }
+
+    taunt(){
+        console.log("Computer Player: You are going down, you don't stand a chance")
+    }
+
+    takeTurn(args){
+		console.log("Computer Player is taking her turn....")
+
+		// minimax(gameboard, 3, true)
+		console.log("Never mind, Computer Player decided to pass and it's your turn again")
+		args.callBack();
+	}
+
+	// This is basically the PseudoCode for minimax lifted directly from https://en.wikipedia.org/wiki/Minimax 
+	// and then translated into JS.
+	// The key/interesting part will be playing around with variations of the 'boardStateValue()' function.
+	minimax(boardState, depth, maximizingPlayer){
+		var boardStateCopy = JSON.parse(JSON.stringify(boardState));
+		if(depth = 0 || isTerminalBoardState(boardStateCopy)){
+			return boardStateValue(boardStateCopy)
+		}
+		if(maximizingPlayer){
+			var value = -1000;
+			var turnOptions = getTurnOptions(boardStateCopy, "Black")
+			turnOptions.map(option => {
+				value = max(value, minimax(applyTurn(boardStateCopy, option), depth - 1, false))
+			})
+			return value
+		} else {// minimizing player *)
+			var value = 1000;
+			var turnOptions = getTurnOptions(boardStateCopy, "White")
+			turnOptions.map(option => {
+				value = min(value, minimax(applyTurn(boardStateCopy, option), depth - 1, true))
+			})
+			return value
+		}
+	}
+}
+
+// Should return whether either player won
+//(or if both players cannot move, kinda tricky)
+function isTerminalBoardState(){
+	return true;
+};
+
+// Returns how good the board state is with 0 being neutral,
+// a higher, positive number being better
+// a lower, negative number being worse
+//
+// A couple potential heuristics:
+//  number of pieces AI player has on board
+//  negative of number of pieces human has on board
+//  difference of AI pieces - Human pieces
+//
+// could experiment with weighting 3 stones/ 2 stones/ 1 stones differently 
+// could experiment with weighting passive-side stones higher/lower
+function boardStateValue(boardState){
+	boardStateValue
+}
+
+// Should return an array of 'turn' objects
+// turn object is
+// { passiveMove: ... , aggressiveMove: ... }
+function getTurnOptions(){
+	return [];
+}
+
+// Takes a board state and a 'turn' object
+// returns the boardState with that turn applied.
+// Ideally could also support half-turns (just aggressive/passive moves)
+function applyTurn(boardState, turn){
+	return boardState
 }
