@@ -111,25 +111,35 @@ function promptForMove(whoseTurn) {
 	});
 }
 
-function updateGameboardWithMove(moveParsed, whoseTurn) {
+//Apply move to main Gameboard
+function updateGameboardWithMove(moveParsed, whoseTurn){
+	updateBoardWithMove(gameboard, moveParsed, whoseTurn)
+}
+
+//Apply move to any board
+function updateBoardWithMove(board, moveParsed, whoseTurn) {
 	var quadrant = moveParsed[0];
 	var moveStart = moveParsed[1];
 	var moveEnd = moveParsed[2];
 	var turnLetter = (whoseTurn === "Black") ? BLACK_STONE : WHITE_STONE;
 
-	var shobu = gameboard[quadrant];
+	var shobu = board[quadrant];
 	shobu[getRow(moveStart)][getColumn(moveStart)] = "-";
 	shobu[getRow(moveEnd)][getColumn(moveEnd)] = turnLetter;
 
-	gameboard[quadrant] = shobu;	
+	board[quadrant] = shobu;
 }
 
-function updateGameboardWithAggresiveMove(moveParsed, whoseTurn) {
+function updateGameboardWithAggresiveMove(moveParsed, whoseTurn){
+	updateBoardWithAggresiveMove(gameboard, moveParsed, whoseTurn)
+}
+
+function updateBoardWithAggresiveMove(board, moveParsed, whoseTurn) {
 	var quadrant = moveParsed[0];
 	var moveStart = moveParsed[1];
 	var moveEnd = moveParsed[2];
 	var turnLetter = (whoseTurn === "Black") ? BLACK_STONE : WHITE_STONE;
-	var shobu = gameboard[quadrant];
+	var shobu = board[quadrant];
 
 	var validate = validateAggresiveMove(moveParsed, whoseTurn);
 	if (validate.push) {
@@ -145,7 +155,7 @@ function updateGameboardWithAggresiveMove(moveParsed, whoseTurn) {
 		shobu[getRow(validate.doublePush)][getColumn(validate.doublePush)] = "-";
 	}
 
-	gameboard[quadrant] = shobu;
+	board[quadrant] = shobu;
 }
 
 function validatePassiveMove(parsedInput, whoseTurn) {
@@ -817,18 +827,43 @@ function boardStateValue(boardState){
 // Should return an array of 'turn' objects
 // turn object is
 // { passiveMove: ... , aggressiveMove: ... }
-function getTurnOptions(){
-	return [];
+// buildAggresiveMovesFromPassiveMove(passiveMoveParsed, whoseTurn)
+function getTurnOptions(boardState){
+	var options = []
+	[QUADRANTS[2], QUADRANTS[3]].forEach(quadrant => { 	//for each starting quadrant
+		getFriendlyStones(quadrant).forEach(stone => {
+			getPassiveMoves(board, stone).forEach(passiveMove => {
+				buildAggresiveMovesFromPassiveMove(boardState, passiveMove, "White").forEach(aggresiveMove => {
+					// Add each passive move, aggresive move combo to the options
+					// If no agressive moves are present for a passive move this gets skipped.
+					options.concat({ passiveMove, aggresiveMove })
+				})
+			})
+		})
+	})
+	return options;
 }
 
 //creates a copy of the board state so it isn't modifying instances of that board state elsewhere
-function safeApplyTurn(boardState){
-	return applyTurn(JSON.parse(JSON.stringify(boardState)));
+function safeApplyTurn(boardState, turn, whoseTurn){
+	return applyTurn(JSON.parse(JSON.stringify(boardState)), turn, whoseTurn);
 }
 
 // Takes a board state and a 'turn' object
 // returns the boardState with that turn applied.
 // Ideally could also support half-turns (just aggressive/passive moves)
-function applyTurn(boardState, turn){
-	return boardState
+function applyTurn(board, turn, whoseTurn) {
+	updateBoardWithMove(board, turn.passiveMove, whoseTurn)
+	updateBoardWithAggresiveMove(board, turn.aggressiveMove, whoseTurn)
+	return board;
+}
+
+// Gets location of each friendly stone in quadrant
+function getFriendlyStones(quadrant){
+
+}
+
+// Returns all possible passive moves for the stone
+function getPassiveMoves(board, stone){
+
 }
